@@ -21,10 +21,10 @@ docker compose up -d
 uv run pytest tests/ -v
 
 # Demonstrate the correct consumer (no loss, no duplicates)
-bash scripts/demo_correct.sh
+uv run python scripts/demo_correct.py
 
 # Demonstrate the bug (commit-before-process loses messages on crash)
-bash scripts/demo_bug.sh
+uv run python scripts/demo_bug.py
 
 # Show a summary of the last demo run
 uv run python -m src.log_report
@@ -41,8 +41,8 @@ kafka-blog-post/
 ├── pyproject.toml                   # uv project config
 ├── docker-compose.yml               # Single-node Kafka (KRaft, no Zookeeper)
 ├── scripts/
-│   ├── demo_correct.sh              # Runs the correct consumer scenario
-│   └── demo_bug.sh                  # Runs the broken consumer scenario
+│   ├── demo_correct.py              # Runs the correct consumer scenario
+│   └── demo_bug.py                  # Runs the broken consumer scenario
 ├── src/
 │   ├── simple_consumer.py           # Correct: process → commit (at-least-once)
 │   ├── commit_before_process_consumer.py  # Broken: commit → process (at-most-once)
@@ -73,15 +73,15 @@ Consumer IDs are prefixed to make their type immediately visible:
 
 Run `uv run python -m src.log_report` after any demo for a summary report.
 
-### Example: `bash scripts/demo_bug.sh`
+### Example: `uv run python scripts/demo_bug.py`
 
 **`logs/producer.json`** — 10 messages produced:
 ```json
 [
-  {"key": "msg-01", "value": "The document was uploaded to the platform for processing."},
-  {"key": "msg-02", "value": "OCR extraction identified three tables and twelve paragraphs."},
+  {"key": "msg-01", "value": "Document uploaded"},
+  {"key": "msg-02", "value": "OCR extraction complete"},
   ...
-  {"key": "msg-10", "value": "Metadata extraction captured document title, date, and author fields."}
+  {"key": "msg-10", "value": "Metadata extracted"}
 ]
 ```
 
@@ -107,15 +107,15 @@ Two things stand out in a run where the bug triggers:
  Duplicates    0
 
 ─── Lost messages ───────────────────────
-  msg-08  Table detection found a financial summary on page four.
-  msg-09  The chunking strategy used 512-token windows with 64-token overlap.
+  msg-08  Table detected on page 4
+  msg-09  Text chunked (512 tokens)
 
 ─── Processed entries ───────────────────
  consumer   partition   offset   key      value
  ────────────────────────────────────────────────────────────────────────
- B:9283             1        0   msg-04   The search index was updated ...
- B:9283             1        1   msg-05   A user query matched two paragraphs ...
- B:4673             0        0   msg-01   The document was uploaded ...
+ B:9283             1        0   msg-04   Search index updated
+ B:9283             1        1   msg-05   User query received
+ B:4673             0        0   msg-01   Document uploaded
  ...
 ```
 
@@ -124,6 +124,6 @@ What happened:
 - The script killed `B:9283` during the 3-second processing sleep — work never finished, nothing written to the log.
 - `B:4673` joined and asked Kafka "where did we leave off?" — Kafka returned the already-committed offset, permanently skipping the lost messages.
 
-Run `bash scripts/demo_correct.sh` to see the contrast — the correct consumer never loses a message because it only commits *after* processing completes.
+Run `uv run python scripts/demo_correct.py` to see the contrast — the correct consumer never loses a message because it only commits *after* processing completes.
 
 > **Note:** the bug is timing-sensitive. The kill has to land in the window between commit and the end of the 3-second processing sleep. Most runs will show at least one lost message, but occasionally the kill lands before the first commit and nothing is lost — in that case just re-run the script.

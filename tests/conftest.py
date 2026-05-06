@@ -2,8 +2,6 @@
 
 import os
 import signal
-import subprocess
-import sys
 import time
 from typing import Generator
 
@@ -16,6 +14,7 @@ from src.helpers import (
     reset_logs,
     wait_for_kafka,
 )
+from src.process_helpers import kill_consumer, start_consumer, stop_consumer, wait_until
 
 
 def _reset_topic():
@@ -65,36 +64,3 @@ def consumer_processes() -> Generator[list[subprocess.Popen], None, None]:
                 p.wait()
 
 
-def start_consumer(module: str) -> subprocess.Popen:
-    """Spawn a consumer as a subprocess."""
-    return subprocess.Popen(
-        [sys.executable, "-m", module],
-        preexec_fn=os.setsid,
-        cwd=str(PROCESSED_LOG.parent.parent),
-    )
-
-
-def stop_consumer(proc: subprocess.Popen, timeout: int = 10) -> None:
-    """Gracefully stop a consumer subprocess."""
-    os.killpg(os.getpgid(proc.pid), signal.SIGINT)
-    try:
-        proc.wait(timeout)
-    except subprocess.TimeoutExpired:
-        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-        proc.wait()
-
-
-def kill_consumer(proc: subprocess.Popen) -> None:
-    """Hard-kill a consumer (simulates crash — no graceful shutdown, no pending commits flushed)."""
-    os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-    proc.wait()
-
-
-def wait_until(condition, timeout: int = 30, interval: float = 0.5) -> bool:
-    """Poll condition until true or timeout. Returns whether condition was met."""
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        if condition():
-            return True
-        time.sleep(interval)
-    return False
