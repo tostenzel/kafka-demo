@@ -24,9 +24,6 @@ Expected result: all 10 messages processed, no loss, no duplicates.
 import json
 import subprocess
 import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.helpers import PRODUCER_LOG, get_consumer_lag, read_processed_log
 from src.process_helpers import kill_consumer, start_consumer, stop_consumer, wait_until

@@ -21,10 +21,10 @@ docker compose up -d
 uv run pytest tests/ -v
 
 # Demonstrate the correct consumer (no loss, no duplicates)
-uv run python scripts/demo_correct.py
+uv run python -m scripts.demo_correct
 
 # Demonstrate the bug (commit-before-process loses messages on crash)
-uv run python scripts/demo_bug.py
+uv run python -m scripts.demo_bug
 
 # Show a summary of the last demo run
 uv run python -m src.log_report
@@ -73,7 +73,7 @@ Consumer IDs are prefixed to make their type immediately visible:
 
 Run `uv run python -m src.log_report` after any demo for a summary report.
 
-### Example: `uv run python scripts/demo_bug.py`
+### Example: `uv run python -m scripts.demo_bug`
 
 **`logs/producer.json`** — 10 messages produced:
 ```json
@@ -124,6 +124,6 @@ What happened:
 - The script killed `B:9283` during the 3-second processing sleep — work never finished, nothing written to the log.
 - `B:4673` joined and asked Kafka "where did we leave off?" — Kafka returned the already-committed offset, permanently skipping the lost messages.
 
-Run `uv run python scripts/demo_correct.py` to see the contrast — the correct consumer never loses a message because it only commits *after* processing completes.
+Run `uv run python -m scripts.demo_correct` to see the contrast — the correct consumer never loses a message because it only commits *after* processing completes.
 
 > **Note:** the bug is timing-sensitive. The kill has to land in the window between commit and the end of the 3-second processing sleep. Most runs will show at least one lost message, but occasionally the kill lands before the first commit and nothing is lost — in that case just re-run the script.
