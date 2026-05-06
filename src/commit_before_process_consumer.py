@@ -43,12 +43,12 @@ class CommitBeforeProcessConsumer:
             self.consumer.close()
 
 
-CONSUMER_ID = f"commit-first-{uuid.uuid4().hex[:8]}"
+CONSUMER_ID = f"B:{uuid.uuid4().hex[:4]}"
 
 
 async def process(msg: Message) -> None:
     """Simulate slow processing (widens the window for the bug)."""
-    await asyncio.sleep(1.0)
+    await asyncio.sleep(3.0)
     key = msg.key().decode() if msg.key() else None
     value = msg.value().decode() if msg.value() else ""
     append_processed(CONSUMER_ID, msg.topic(), msg.partition(), msg.offset(), key, value)

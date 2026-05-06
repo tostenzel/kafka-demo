@@ -3,7 +3,6 @@
 import fcntl
 import json
 import time
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -39,13 +38,11 @@ def append_processed(
 ) -> None:
     """Atomically append one JSON line to processed log."""
     entry = {
-        "consumer_id": consumer_id,
-        "topic": topic,
+        "consumer": consumer_id,
         "partition": partition,
         "offset": offset,
         "key": key,
         "value": value,
-        "ts": datetime.now(timezone.utc).isoformat(),
     }
     line = json.dumps(entry) + "\n"
     with open(PROCESSED_LOG, "a", encoding="utf-8") as f:

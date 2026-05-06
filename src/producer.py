@@ -1,7 +1,6 @@
 """Simple Kafka producer — sends chunked text messages to a topic."""
 
 import json
-import uuid
 
 from confluent_kafka import Producer
 
@@ -9,16 +8,16 @@ from src.config import BOOTSTRAP_SERVERS, TOPIC
 from src.helpers import PRODUCER_LOG, ensure_topic, reset_logs
 
 SAMPLE_MESSAGES = [
-    "The document was uploaded to the platform for processing.",
-    "OCR extraction identified three tables and twelve paragraphs.",
-    "Semantic embeddings were generated using the latest model version.",
-    "The search index was updated with the new document vectors.",
-    "A user query matched two paragraphs with high confidence scores.",
-    "The RAG system retrieved context and generated a summary response.",
-    "Page segmentation split the PDF into individual page images.",
-    "Table detection found a financial summary on page four.",
-    "The chunking strategy used 512-token windows with 64-token overlap.",
-    "Metadata extraction captured document title, date, and author fields.",
+    "Document uploaded",
+    "OCR extraction complete",
+    "Embeddings generated",
+    "Search index updated",
+    "User query received",
+    "RAG response generated",
+    "PDF pages segmented",
+    "Table detected on page 4",
+    "Text chunked (512 tokens)",
+    "Metadata extracted",
 ]
 
 
@@ -31,8 +30,8 @@ def produce_messages(topic: str = TOPIC, messages: list[str] | None = None) -> i
     producer = Producer({"bootstrap.servers": BOOTSTRAP_SERVERS})
     produced_log: list[dict] = []
 
-    for msg in messages:
-        key = str(uuid.uuid4())
+    for idx, msg in enumerate(messages):
+        key = f"msg-{idx + 1:02d}"
         producer.produce(topic, value=msg.encode(), key=key.encode())
         produced_log.append({"key": key, "value": msg})
 

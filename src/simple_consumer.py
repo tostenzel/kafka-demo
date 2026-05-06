@@ -40,7 +40,7 @@ class SimpleConsumer:
             self.consumer.close()
 
 
-CONSUMER_ID = f"simple-{uuid.uuid4().hex[:8]}"
+CONSUMER_ID = f"S:{uuid.uuid4().hex[:4]}"
 
 
 async def process(msg: Message) -> None:
