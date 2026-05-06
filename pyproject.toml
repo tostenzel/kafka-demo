@@ -1,0 +1,9 @@
+[project]
+name = "kafka-blog-examples"
+version = "0.1.0"
+description = "Companion code for 'Understanding Kafka Consumer Groups by Breaking Them'"
+requires-python = ">=3.12"
+dependencies = [
+    "confluent-kafka>=2.6.0",
+    "pytest>=8.0",
+]
