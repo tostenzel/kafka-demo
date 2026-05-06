@@ -48,6 +48,7 @@ kafka-blog-post/
 │   ├── commit_before_process_consumer.py  # Broken: commit → process (at-most-once)
 │   ├── producer.py                  # Produces sample messages
 │   ├── log_report.py                # Pretty-prints the demo logs
+│   ├── process_helpers.py           # Subprocess helpers shared by demos and tests
 │   └── helpers.py                   # Shared utilities (logging, lag check, topic mgmt)
 └── tests/
     ├── test_rebalance.py            # Integration tests proving correctness and exposing bugs
